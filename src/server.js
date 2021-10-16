@@ -16,8 +16,7 @@ app.use("/public", express.static(__dirname + '/src/public'));
 
 console.log(__dirname)
 
-app.get("/", (req, res) => res.render("home"));
-
+app.get("/*", (req, res) => res.render("home"));
 
 const portNum = 3001;
 const handleListen = () => console.log(`Listening on http://localhost:${portNum}`)
