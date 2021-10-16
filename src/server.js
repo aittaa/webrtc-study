@@ -1,7 +1,9 @@
 
 
 import express from "express";
+import { WebSocketServer } from 'ws';
 
+import http from "http"
 import path from 'path';
 const __dirname = path.resolve();
 
@@ -16,8 +18,14 @@ app.use("/public", express.static(__dirname + '/src/public'));
 
 console.log(__dirname)
 
-app.get("/*", (req, res) => res.render("home"));
+app.get("/", (_, res) => res.render("home"));
+app.get("/*", (_, res) => res.redirect("/"));
 
 const portNum = 3001;
 const handleListen = () => console.log(`Listening on http://localhost:${portNum}`)
-app.listen(portNum, handleListen);
+
+
+const server = http.createServer(app);
+const wss = new WebSocketServer({ server });
+
+server.listen(portNum, handleListen);
