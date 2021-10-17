@@ -1,4 +1,4 @@
-
+import { instrument } from "@socket.io/admin-ui"
 import {Server as SocketIO} from "socket.io"
 
 import express from "express";
@@ -27,15 +27,22 @@ const handleListen = () => console.log(`Listening on http://localhost:${portNum}
 
 
 const httpServer = http.createServer(app);
-const wsServer = new SocketIO(httpServer);
-    
+const wsServer = new SocketIO(httpServer, {
+    cors: {
+      origin: ["https://admin.socket.io"],
+      credentials: true,
+    },
+});
+  
+instrument(wsServer, {
+    auth: false,
+});
 
 function publicRooms() {
 
-    const { sockets: { adapter: sids, rooms } } = wsServer;
+    const { sockets: { adapter: {sids, rooms} } } = wsServer;
     // const sids = wsServer.sockets.adapter.sids;
     // const rooms = wsServer.sockets.adapter.rooms;
-
     const publicRooms = [];
 
     rooms.forEach((_, key) => {
@@ -43,11 +50,14 @@ function publicRooms() {
             publicRooms.push(key);
         }
     });
-    
+
     return publicRooms;
 }
 
-
+function countRoom(roomName) {
+    const rooms = wsServer.sockets.adapter.rooms;
+    return rooms.get(roomName)?.size;
+}
 
 wsServer.on("connection", socket => {
 
@@ -59,15 +69,18 @@ wsServer.on("connection", socket => {
     socket.on("enter_room", (roomName, done) => {
 
         socket.join(roomName);
-        done();
+        done(countRoom(roomName));
 
-        socket.to(roomName).emit("welcome", socket.nickname);
+        socket.to(roomName).emit("welcome", socket.nickname, countRoom(roomName));
+        wsServer.sockets.emit("room_change", publicRooms());
     });
         
     socket.on("disconnecting", () => {
-        socket.rooms.forEach(room => socket.to(room).emit("bye", socket.nickname));
+        socket.rooms.forEach(room => socket.to(room).emit("bye", socket.nickname, countRoom(room)-1));
     });
-
+    socket.on("disconnect", () => {
+        wsServer.sockets.emit("room_change", publicRooms());
+    })
     socket.on("message", (msg, room, done) => {
         socket.to(room).emit("message", `${socket.nickname} : ${msg}`);
         done();
