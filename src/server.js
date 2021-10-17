@@ -41,10 +41,16 @@ wsServer.on("connection", socket => {
         done();
 
         socket.to(roomName).emit("welcome");
-    }
+    });
         
-)
+    socket.on("disconnecting", () => {
+        socket.rooms.forEach(room => socket.to(room).emit("bye"));
+    });
 
+    socket.on("message", (msg, room, done) => {
+        socket.to(room).emit("message", msg);
+        done();
+    });
 });
 
 
