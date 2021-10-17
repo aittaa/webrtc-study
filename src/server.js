@@ -1,7 +1,8 @@
 
+import {Server as SocketIO} from "socket.io"
 
 import express from "express";
-import { WebSocketServer } from 'ws';
+// import { WebSocketServer } from 'ws';
 
 import http from "http"
 import path from 'path';
@@ -25,8 +26,19 @@ const portNum = 3001;
 const handleListen = () => console.log(`Listening on http://localhost:${portNum}`)
 
 
-const server = http.createServer(app);
-const wss = new WebSocketServer({ server });
+const httpServer = http.createServer(app);
+const wsServer = new SocketIO(httpServer);
+    nb  
+
+wsServer.on("connection", socket => {
+    
+    console.log(socket);
+
+});
+
+
+
+/* const wss = new WebSocketServer({ server });
 
 
 const sockets = [];
@@ -63,6 +75,6 @@ wss.on("connection", (socket) => {
 
     //socket.send("hello")
 
-});
+}); */
 
-server.listen(portNum, handleListen);
+httpServer.listen(portNum, handleListen);
