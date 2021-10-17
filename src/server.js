@@ -28,11 +28,15 @@ const handleListen = () => console.log(`Listening on http://localhost:${portNum}
 
 const httpServer = http.createServer(app);
 const wsServer = new SocketIO(httpServer);
-    nb  
-
+    
 wsServer.on("connection", socket => {
     
-    console.log(socket);
+    socket.on("enter_room", (msg, done) => {
+        console.log(msg);
+        setTimeout(() => {
+            done();
+        }, 5000);
+    })
 
 });
 
