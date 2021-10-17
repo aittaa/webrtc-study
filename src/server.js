@@ -29,6 +29,26 @@ const handleListen = () => console.log(`Listening on http://localhost:${portNum}
 const httpServer = http.createServer(app);
 const wsServer = new SocketIO(httpServer);
     
+
+function publicRooms() {
+
+    const { sockets: { adapter: sids, rooms } } = wsServer;
+    // const sids = wsServer.sockets.adapter.sids;
+    // const rooms = wsServer.sockets.adapter.rooms;
+
+    const publicRooms = [];
+
+    rooms.forEach((_, key) => {
+        if (sids.get(key) === undefined) {
+            publicRooms.push(key);
+        }
+    });
+    
+    return publicRooms;
+}
+
+
+
 wsServer.on("connection", socket => {
 
     socket["nickname"] = "Anonymous";
@@ -55,47 +75,5 @@ wsServer.on("connection", socket => {
     
     socket.on("nickname", (nickname) => { socket["nickname"] = nickname;})
 });
-
-
-
-
-/* const wss = new WebSocketServer({ server });
-
-
-const sockets = [];
-
-wss.on("connection", (socket) => {
-    
-    sockets.push(socket);
-
-    socket["nickname"] = "Anonymous";
-
-    console.log("Connected to Browser 👍");
-    socket.on("close", () => {
-        console.log("Disconnected from the Browser");
-    });
-
-    socket.on("message", msg => {
-
-        const message = JSON.parse(msg);
-
-        console.log(message.payload);
-        
-        switch (message.type) {
-            case "message":
-                sockets.forEach((aSocket) =>
-                    aSocket.send(`${socket.nickname} : ${message.payload}`)
-                );
-                break;
-            case "nickname":
-                socket["nickname"] = message.payload;
-                break;
-        }
-
-    });
-
-    //socket.send("hello")
-
-}); */
 
 httpServer.listen(portNum, handleListen);
