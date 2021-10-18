@@ -1,4 +1,4 @@
-import { instrument } from "@socket.io/admin-ui"
+
 import {Server as SocketIO} from "socket.io"
 
 import express from "express";
