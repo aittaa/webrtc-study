@@ -22,7 +22,7 @@ console.log(__dirname)
 app.get("/", (_, res) => res.render("home"));
 app.get("/*", (_, res) => res.redirect("/"));
 
-const portNum = 3001;
+const portNum = 3000;
 const handleListen = () => console.log(`Listening on http://localhost:${portNum}`)
 
 
